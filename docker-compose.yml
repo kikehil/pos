@@ -1,52 +1,44 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: pos_postgres
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
+  db:
+    image: mysql:8.0
+    container_name: pos_mysql
+    restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: pos_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pos_saas_pro
+    ports:
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d pos_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - pos_network
+      - mysql_data:/var/lib/mysql
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pos_pgadmin
-    restart: unless-stopped
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pos.local
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: pos_api
     depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - pos_network
+      - db
+    environment:
+      DATABASE_URL: "mysql://root:root@db:3306/pos_saas_pro"
+      JWT_SECRET: "your_jwt_secret_here"
+    ports:
+      - "3000:3000"
+    restart: always
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://YOUR_VPS_IP:3000
+    container_name: pos_web
+    depends_on:
+      - api
+    ports:
+      - "3012:3001"
+    restart: always
 
 volumes:
-  postgres_data:
-    driver: local
-  pgadmin_data:
-    driver: local
-
-networks:
-  pos_network:
-    driver: bridge
-
-
+  mysql_data:
