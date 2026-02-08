@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  CASHIER
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+
+// ============================================
+// MULTI-TENANCY
+// ============================================
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  address   String?  @db.Text
+  phone     String?
+  rfc       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  products   Product[]
+  categories Category[]
+  sales      Sale[]
+  cashShifts CashShift[]
+  customers  Customer[]
+
+
+  @@map("tenants")
+}
+
+// ============================================
+// USERS
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(CASHIER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantId   String
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sales      Sale[]
+  cashShifts CashShift[]
+
+  @@index([tenantId])
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================
+// CATEGORIES
+// ============================================
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([tenantId])
+  @@map("categories")
+}
+
+// ============================================
+// PRODUCTS
+// ============================================
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  sku         String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantId   String
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants   ProductVariant[]
+
+  @@index([tenantId])
+  @@index([categoryId])
+  @@index([sku])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  name      String
+  sku       String   @unique
+  price     Decimal  @db.Decimal(10, 2)
+  cost      Decimal? @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  minStock  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  saleItems SaleItem[]
+
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+// ============================================
+// SALES
+// ============================================
+
+model Sale {
+  id            String   @id @default(uuid())
+  saleNumber    String
+  total         Decimal  @db.Decimal(10, 2)
+  subtotal      Decimal  @db.Decimal(10, 2)
+  tax           Decimal  @db.Decimal(10, 2) @default(0)
+  discount      Decimal  @db.Decimal(10, 2) @default(0)
+  paymentMethod PaymentMethod @default(CASH)
+  receivedAmount Decimal? @db.Decimal(10, 2)
+  changeAmount   Decimal? @db.Decimal(10, 2)
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+
+  tenantId String
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User       @relation(fields: [userId], references: [id])
+  items    SaleItem[]
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([saleNumber])
+  @@index([createdAt])
+  @@unique([tenantId, saleNumber])
+  @@map("sales")
+}
+
+model SaleItem {
+  id          String   @id @default(uuid())
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  subtotal    Decimal  @db.Decimal(10, 2)
+  discount    Decimal  @db.Decimal(10, 2) @default(0)
+  productName String
+  variantName String
+  productSku  String?
+  createdAt   DateTime @default(now())
+
+  saleId    String
+  sale      Sale            @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([saleId])
+  @@index([variantId])
+  @@map("sale_items")
+}
+
+// ============================================
+// CASH CONTROL
+// ============================================
+
+model CashShift {
+  id             String      @id @default(uuid())
+  startTime      DateTime    @default(now())
+  endTime        DateTime?
+  startAmount    Decimal     @db.Decimal(10, 2)
+  endAmount      Decimal?    @db.Decimal(10, 2)
+  expectedAmount Decimal     @db.Decimal(10, 2) @default(0)
+  status         ShiftStatus @default(OPEN)
+  notes          String?     @db.Text
+
+  tenantId     String
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  transactions CashTransaction[]
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
+  @@map("cash_shifts")
+}
+
+model CashTransaction {
+  id        String   @id @default(uuid())
+  amount    Decimal  @db.Decimal(10, 2)
+  type      String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  shiftId String
+  shift   CashShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  @@index([shiftId])
+  @@map("cash_transactions")
+}
+
+// ============================================
+// CUSTOMERS
+// ============================================
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  taxId     String?  // RFC/RUT/DNI
+  address   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sales    Sale[]
+
+  @@index([tenantId])
+  @@map("customers")
+}
+

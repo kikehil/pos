@@ -1,0 +1,121 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+
+@Injectable()
+export class ProductsService {
+  constructor(private readonly prisma: PrismaService) { }
+
+  async create(createProductDto: CreateProductDto) {
+    const { name, description, sku, price, stock, categoryId, tenantId } = createProductDto;
+
+    // Generar un SKU automático si no viene: 3 letras + números aleatorios
+    const generatedSku = sku || (name.substring(0, 3).toUpperCase() + Math.floor(1000 + Math.random() * 9000));
+
+    return this.prisma.product.create({
+      data: {
+        name,
+        description,
+        sku: generatedSku,
+        categoryId,
+        tenantId: tenantId || '',
+        variants: {
+          create: {
+            name: 'Standard', // Nombre solicitado
+            sku: `${generatedSku}-STD`,
+            price: price,
+            stock: stock,
+            isActive: true,
+          },
+        },
+      },
+      include: {
+        variants: true,
+      },
+    });
+  }
+
+
+  async findAll(tenantId: string) {
+    return this.prisma.product.findMany({
+      where: {
+        tenantId,
+        isActive: true,
+      },
+      include: {
+        variants: true,
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        variants: true,
+        category: true,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    return product;
+  }
+
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const { name, description, sku, categoryId, price, stock } = updateProductDto;
+
+    // Primero actualizamos el producto padre
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        sku,
+        categoryId,
+      },
+      include: {
+        variants: true,
+      },
+    });
+
+    // Si se envió precio o stock, actualizamos la primera variante (producto simple)
+    if (price !== undefined || stock !== undefined) {
+      const defaultVariant = product.variants[0];
+      if (defaultVariant) {
+        await this.prisma.productVariant.update({
+          where: { id: defaultVariant.id },
+          data: {
+            price: price !== undefined ? price : undefined,
+            stock: stock !== undefined ? stock : undefined,
+          },
+        });
+      }
+    }
+
+    return this.findOne(id);
+  }
+
+  async remove(id: string) {
+    // Borrado físico (según requerimiento)
+    // Prisma borrará las variantes en cascada (según esquema onDelete: Cascade)
+    const product = await this.findOne(id);
+    return this.prisma.product.delete({
+      where: { id: product.id },
+    });
+  }
+
+  async findAllCategories(tenantId: string) {
+    return this.prisma.category.findMany({
+      where: { tenantId },
+    });
+  }
+}
+
