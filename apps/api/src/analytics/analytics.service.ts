@@ -11,6 +11,8 @@ export class AnalyticsService {
         const endOfToday = new Date();
         endOfToday.setHours(23, 59, 59, 999);
 
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
         // 1. Ventas de hoy
         const todaySales = await this.prisma.sale.aggregate({
             where: {
@@ -41,7 +43,51 @@ export class AnalyticsService {
             },
         });
 
-        // 3. Ventas de los últimos 7 días
+        // 3. Gastos del mes
+        const monthlyExpenses = await this.prisma.expense.aggregate({
+            where: {
+                tenantId,
+                date: {
+                    gte: startOfMonth,
+                }
+            },
+            _sum: {
+                amount: true
+            }
+        });
+
+        // 4. Utilidad (Ventas Totales - Costos de Productos de este mes)
+        // Obtenemos todas las ventas del mes para calcular utilidad bruta
+        const monthlySalesData = await this.prisma.sale.findMany({
+            where: {
+                tenantId,
+                createdAt: { gte: startOfMonth }
+            },
+            include: {
+                items: {
+                    include: {
+                        variant: { select: { cost: true } }
+                    }
+                }
+            }
+        });
+
+        let totalMonthlyRevenue = 0;
+        let totalMonthlyCost = 0;
+
+        monthlySalesData.forEach(sale => {
+            totalMonthlyRevenue += Number(sale.total);
+            sale.items.forEach(item => {
+                const cost = Number(item.variant?.cost || 0);
+                totalMonthlyCost += cost * item.quantity;
+            });
+        });
+
+        const grossProfit = totalMonthlyRevenue - totalMonthlyCost;
+        const totalExpenses = Number(monthlyExpenses._sum.amount) || 0;
+        const netProfit = grossProfit - totalExpenses;
+
+        // 5. Ventas de los últimos 7 días
         const last7Days = [];
         const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
 
@@ -74,7 +120,7 @@ export class AnalyticsService {
         }
 
 
-        // 4. Top productos (por venta total en SaleItem)
+        // 6. Top productos (por venta total en SaleItem)
         const topProductsRaw = await this.prisma.saleItem.groupBy({
             by: ['productName'],
             where: {
@@ -104,6 +150,12 @@ export class AnalyticsService {
             lowStockProducts: lowStockCount,
             salesByDay: last7Days,
             topProducts,
+            monthlyStats: {
+                totalExpenses,
+                grossProfit,
+                netProfit,
+                totalRevenue: totalMonthlyRevenue
+            }
         };
     }
 }

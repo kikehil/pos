@@ -48,6 +48,8 @@ model Tenant {
   sales      Sale[]
   cashShifts CashShift[]
   customers  Customer[]
+  expenses   Expense[]
+
 
 
   @@map("tenants")
@@ -71,6 +73,8 @@ model User {
   tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   sales      Sale[]
   cashShifts CashShift[]
+  expenses   Expense[]
+
 
   @@index([tenantId])
   @@index([email])
@@ -261,4 +265,29 @@ model Customer {
   @@index([tenantId])
   @@map("customers")
 }
+
+// ============================================
+// EXPENSES
+// ============================================
+
+model Expense {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(10, 2)
+  description String   @db.Text
+  category    String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([date])
+  @@map("expenses")
+}
+
 

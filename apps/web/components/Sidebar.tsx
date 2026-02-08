@@ -13,8 +13,10 @@ import {
     Tag,
     LogIn,
     LogOut,
-    Users
+    Users,
+    TrendingDown
 } from 'lucide-react';
+
 
 
 const navigation = [
@@ -24,8 +26,10 @@ const navigation = [
     { name: 'Mis Clientes', href: '/customers', icon: Users, roles: ['ADMIN'] },
     { name: 'Productos', href: '/products', icon: LayoutGrid, roles: ['ADMIN'] },
     { name: 'Categorías', href: '/categories', icon: Tag, roles: ['ADMIN'] },
+    { name: 'Gastos', href: '/expenses', icon: TrendingDown, roles: ['ADMIN'] },
     { name: 'Equipo', href: '/team', icon: LayoutGrid, roles: ['ADMIN'] },
     { name: 'Configuración', href: '/settings', icon: Settings, roles: ['ADMIN'] },
+
 ];
 
 

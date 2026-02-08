@@ -9,9 +9,10 @@ import { CategoriesModule } from './categories/categories.module';
 import { CashShiftsModule } from './cash-shifts/cash-shifts.module';
 import { UsersModule } from './users/users.module';
 import { CustomersModule } from './customers/customers.module';
+import { ExpensesModule } from './expenses.module';
 
 @Module({
-  imports: [PrismaModule, ProductsModule, SalesModule, TenantsModule, AnalyticsModule, AuthModule, CategoriesModule, CashShiftsModule, UsersModule, CustomersModule],
+  imports: [PrismaModule, ProductsModule, SalesModule, TenantsModule, AnalyticsModule, AuthModule, CategoriesModule, CashShiftsModule, UsersModule, CustomersModule, ExpensesModule],
 
 
 

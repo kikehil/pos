@@ -5,12 +5,11 @@ import {
     TrendingUp,
     ShoppingBag,
     AlertTriangle,
-    Calendar,
     LayoutDashboard,
     ArrowUpRight,
-    Package,
-    ChevronRight,
-    TrendingDown
+    TrendingDown,
+    DollarSign,
+    Target
 } from 'lucide-react';
 import {
     AreaChart,
@@ -32,6 +31,12 @@ interface DashboardData {
     lowStockProducts: number;
     salesByDay: { name: string; total: number }[];
     topProducts: { name: string; total: number }[];
+    monthlyStats?: {
+        totalExpenses: number;
+        grossProfit: number;
+        netProfit: number;
+        totalRevenue: number;
+    };
 }
 
 export default function DashboardPage() {
@@ -73,11 +78,8 @@ export default function DashboardPage() {
                 if (!response.ok) throw new Error('Failed to fetch dashboard');
                 const result = await response.json();
 
-                // Validación básica de la estructura de datos
                 if (result && typeof result.totalOrdersToday !== 'undefined') {
                     setData(result);
-                } else {
-                    console.error('Data structure invalid:', result);
                 }
             } catch (error) {
                 console.error('Error fetching dashboard:', error);
@@ -88,8 +90,6 @@ export default function DashboardPage() {
 
         fetchDashboard();
     }, [router]);
-
-
 
     const today = new Date().toLocaleDateString('es-ES', {
         weekday: 'long',
@@ -118,20 +118,29 @@ export default function DashboardPage() {
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
-                    {/* Bento Grid: KPI Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Stat Cards Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <StatCard
+                            label="Utilidad Neta"
+                            value={data?.monthlyStats ? formatPrice(data.monthlyStats.netProfit) : '$0.00'}
+                            icon={Target}
+                            color={data?.monthlyStats && data.monthlyStats.netProfit >= 0 ? "text-emerald-600" : "text-rose-600"}
+                            bgColor={data?.monthlyStats && data.monthlyStats.netProfit >= 0 ? "bg-emerald-50" : "bg-rose-50"}
+                            isLoading={isLoading}
+                            trend={data?.monthlyStats && data.monthlyStats.netProfit >= 0 ? "UP" : "DOWN"}
+                        />
+                        <StatCard
+                            label="Gastos Mes"
+                            value={data?.monthlyStats ? formatPrice(data.monthlyStats.totalExpenses) : '$0.00'}
+                            icon={TrendingDown}
+                            color="text-amber-600"
+                            bgColor="bg-amber-50"
+                            isLoading={isLoading}
+                        />
                         <StatCard
                             label="Ventas Hoy"
                             value={data ? formatPrice(data.totalSalesToday) : '$0.00'}
                             icon={TrendingUp}
-                            color="text-emerald-600"
-                            bgColor="bg-emerald-50"
-                            isLoading={isLoading}
-                        />
-                        <StatCard
-                            label="Pedidos Hoy"
-                            value={data?.totalOrdersToday?.toString() ?? '0'}
-                            icon={ShoppingBag}
                             color="text-indigo-600"
                             bgColor="bg-indigo-50"
                             isLoading={isLoading}
@@ -184,9 +193,7 @@ export default function DashboardPage() {
                                                 tick={{ fill: '#9ca3af', fontSize: 12 }}
                                                 dy={10}
                                             />
-                                            <YAxis
-                                                hide
-                                            />
+                                            <YAxis hide />
                                             <Tooltip
                                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                             />
@@ -201,7 +208,6 @@ export default function DashboardPage() {
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
-
                                 )}
                             </div>
                         </div>
@@ -261,17 +267,17 @@ export default function DashboardPage() {
     );
 }
 
-function StatCard({ label, value, icon: Icon, color, bgColor, isLoading, warning }: any) {
+function StatCard({ label, value, icon: Icon, color, bgColor, isLoading, warning, trend }: any) {
     return (
         <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm group hover:border-indigo-100 transition-all">
             <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 ${bgColor} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300`}>
                     <Icon className={`w-6 h-6 ${color}`} />
                 </div>
-                {!isLoading && (
-                    <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>+12%</span>
+                {trend && (
+                    <div className={`flex items-center gap-1 text-[10px] font-black ${trend === 'UP' ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50'} px-2 py-1 rounded-full`}>
+                        {trend === 'UP' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        <span>{trend === 'UP' ? '+ Real' : '- Déficit'}</span>
                     </div>
                 )}
             </div>
@@ -282,8 +288,8 @@ function StatCard({ label, value, icon: Icon, color, bgColor, isLoading, warning
                 </div>
             ) : (
                 <>
-                    <h4 className={`text-2xl font-black ${warning ? 'text-rose-600' : 'text-gray-900'} tracking-tight`}>{value}</h4>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{label}</p>
+                    <h4 className={`text-xl font-black ${warning ? 'text-rose-600' : 'text-gray-900'} tracking-tight`}>{value}</h4>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{label}</p>
                 </>
             )}
         </div>
@@ -293,5 +299,3 @@ function StatCard({ label, value, icon: Icon, color, bgColor, isLoading, warning
 function Skeleton({ className }: { className?: string }) {
     return <div className={`animate-pulse bg-gray-200 ${className}`} />;
 }
-
-
