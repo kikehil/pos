@@ -32,8 +32,9 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://YOUR_VPS_IP:3000
+        NEXT_PUBLIC_API_URL: http://pos-cerebrodigital.com.mx/api
     container_name: pos_web
+
     depends_on:
       - api
     ports:
