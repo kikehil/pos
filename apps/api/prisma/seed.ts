@@ -41,7 +41,7 @@ async function main() {
       email: 'admin@agencia.com',
       name: 'Administrador',
       password: hashedPassword,
-      role: UserRole.OWNER,
+      role: UserRole.ADMIN,
       isActive: true,
       tenantId: tenant.id,
     },
