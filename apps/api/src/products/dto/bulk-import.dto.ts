@@ -1,19 +1,22 @@
-import { IsArray, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class BulkImportItemDto {
     @IsString()
-    name: string;
+    @IsNotEmpty()
+    name!: string;
 
     @IsNumber()
-    price: number;
+    @IsNotEmpty()
+    price!: number;
 
     @IsNumber()
     @IsOptional()
     cost?: number;
 
-    @IsNumber()
-    stock: number;
+    @IsInt()
+    @IsNotEmpty()
+    stock!: number;
 
     @IsString()
     @IsOptional()
@@ -28,5 +31,5 @@ export class BulkImportDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => BulkImportItemDto)
-    items: BulkImportItemDto[];
+    items!: BulkImportItemDto[];
 }

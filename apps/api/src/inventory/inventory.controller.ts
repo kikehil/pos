@@ -9,7 +9,7 @@ export class InventoryController {
     constructor(private readonly inventoryService: InventoryService) { }
 
     @Post('adjustments')
-    create(@Request() req, @Body() createAdjustmentDto: CreateAdjustmentDto) {
+    create(@Request() req: any, @Body() createAdjustmentDto: CreateAdjustmentDto) {
         // Asumimos que el usuario viene en el request (JWT strategy)
         // y que tiene tenantId
         const userId = req.user.userId;

@@ -15,17 +15,20 @@ export enum AdjustmentReason {
 
 export class CreateAdjustmentDto {
     @IsUUID()
-    productId: string;
+    @IsNotEmpty()
+    productId!: string;
 
     @IsEnum(AdjustmentType)
-    type: AdjustmentType;
+    @IsNotEmpty()
+    type!: AdjustmentType;
 
     @IsEnum(AdjustmentReason)
-    reason: AdjustmentReason;
+    @IsNotEmpty()
+    reason!: AdjustmentReason;
 
     @IsInt()
     @Min(1)
-    quantity: number;
+    quantity!: number;
 
     @IsString()
     @IsOptional()
