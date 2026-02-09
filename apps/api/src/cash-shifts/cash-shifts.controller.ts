@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { CashShiftsService } from './cash-shifts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 
 @Controller('cash-shifts')
 @UseGuards(JwtAuthGuard)

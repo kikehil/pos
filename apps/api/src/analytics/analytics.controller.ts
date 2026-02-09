@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { RolesGuard } from '../auth/roles.guard';

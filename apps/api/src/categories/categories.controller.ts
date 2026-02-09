@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete, NotFoundException, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('categories')
