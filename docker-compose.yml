@@ -28,7 +28,7 @@ services:
       DATABASE_URL: "mysql://root:root@db:3306/pos_saas_pro"
       JWT_SECRET: "your_jwt_secret_here"
     ports:
-      - "3000:3000"
+      - "3002:3000"
     restart: always
 
   web:
