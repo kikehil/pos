@@ -75,7 +75,7 @@ export default function ProductsPage() {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch('http://localhost:3000/products', {
+            const response = await fetch('/api/products', {
                 headers: getAuthHeader(),
             });
 
@@ -95,7 +95,7 @@ export default function ProductsPage() {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:3000/products/categories', {
+            const response = await fetch('/api/products/categories', {
                 headers: getAuthHeader(),
             });
             const data = await response.json();
@@ -114,7 +114,7 @@ export default function ProductsPage() {
         if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/products/${id}`, {
+            const response = await fetch(`/api/products/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader(),
             });

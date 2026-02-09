@@ -59,7 +59,7 @@ export default function SettingsPage() {
     const fetchTenantInfo = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/tenants/me');
+            const response = await fetch('/api/tenants/me');
             const data: TenantInfo = await response.json();
 
             setFormData({
@@ -91,7 +91,7 @@ export default function SettingsPage() {
 
         try {
             setSaving(true);
-            const response = await fetch('http://localhost:3000/tenants/me', {
+            const response = await fetch('/api/tenants/me', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

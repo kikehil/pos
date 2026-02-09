@@ -185,7 +185,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
 
   const fetchCurrentShift = async () => {
     try {
-      const response = await fetch('http://localhost:3000/cash-shifts/current', {
+      const response = await fetch('/api/cash-shifts/current', {
         headers: getAuthHeader(),
       });
 
@@ -211,7 +211,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:3000/categories', {
+      const response = await fetch('/api/categories', {
         headers: getAuthHeader(),
       });
       if (response.ok) {
@@ -227,7 +227,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('http://localhost:3000/customers', {
+      const response = await fetch('/api/customers', {
         headers: getAuthHeader(),
       });
       if (response.ok) {
@@ -244,7 +244,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
   useEffect(() => {
     const fetchTenantInfo = async () => {
       try {
-        const response = await fetch('http://localhost:3000/tenants/me', {
+        const response = await fetch('/api/tenants/me', {
           headers: getAuthHeader(),
         });
         if (response.ok) {
@@ -270,7 +270,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
   const handleOpenShift = async () => {
     setIsProcessing(true);
     try {
-      const response = await fetch('http://localhost:3000/cash-shifts/open', {
+      const response = await fetch('/api/cash-shifts/open', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -293,7 +293,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
   const handleCloseShift = async () => {
     setIsProcessing(true);
     try {
-      const response = await fetch('http://localhost:3000/cash-shifts/close', {
+      const response = await fetch('/api/cash-shifts/close', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -444,7 +444,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
 
 
 
-      const response = await fetch('http://localhost:3000/sales', {
+      const response = await fetch('/api/sales', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -503,7 +503,7 @@ export default function PosTerminal({ products, tenantId }: Props) {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      const response = await fetch('http://localhost:3000/customers', {
+      const response = await fetch('/api/customers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

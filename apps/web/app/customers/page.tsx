@@ -78,7 +78,7 @@ export default function CustomersPage() {
 
     const fetchCustomers = async () => {
         try {
-            const response = await fetch('http://localhost:3000/customers', {
+            const response = await fetch('/api/customers', {
                 headers: getAuthHeader() as HeadersInit,
             });
 
@@ -119,7 +119,7 @@ export default function CustomersPage() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch('http://localhost:3000/customers', {
+            const response = await fetch('/api/customers', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export default function CustomersPage() {
         if (!confirm(`¿Estás seguro de eliminar a ${customer.name}?`)) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/customers/${customer.id}`, {
+            const response = await fetch(`/api/customers/${customer.id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader() as HeadersInit,
             });
@@ -173,7 +173,7 @@ export default function CustomersPage() {
         setIsHistoryLoading(true);
 
         try {
-            const response = await fetch(`http://localhost:3000/customers/${customer.id}/history`, {
+            const response = await fetch(`/api/customers/${customer.id}/history`, {
                 headers: getAuthHeader() as HeadersInit,
             });
 

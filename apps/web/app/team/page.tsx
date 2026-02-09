@@ -49,7 +49,7 @@ export default function TeamPage() {
 
     const fetchTeam = async () => {
         try {
-            const response = await fetch('http://localhost:3000/users', {
+            const response = await fetch('/api/users', {
                 headers: getAuthHeader(),
             });
             if (response.status === 401) {
@@ -94,7 +94,7 @@ export default function TeamPage() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch('http://localhost:3000/users', {
+            const response = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export default function TeamPage() {
         if (!confirm(`¿Estás seguro de eliminar a ${user.name}?`)) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/users/${user.id}`, {
+            const response = await fetch(`/api/users/${user.id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader(),
             });

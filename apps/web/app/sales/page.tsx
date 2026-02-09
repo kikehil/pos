@@ -71,7 +71,7 @@ export default function SalesPage() {
     const fetchSales = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/sales', {
+            const response = await fetch('/api/sales', {
                 headers: getAuthHeader(),
             });
 

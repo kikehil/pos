@@ -80,7 +80,7 @@ export default function ExpensesPage() {
 
     const fetchExpenses = async () => {
         try {
-            const response = await fetch('http://localhost:3000/expenses', {
+            const response = await fetch('/api/expenses', {
                 headers: getAuthHeader(),
             });
             if (response.status === 401) {
@@ -110,7 +110,7 @@ export default function ExpensesPage() {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch('http://localhost:3000/expenses', {
+            const response = await fetch('/api/expenses', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export default function ExpensesPage() {
         if (!confirm('¿Seguro que quieres eliminar este registro de gasto?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/expenses/${id}`, {
+            const response = await fetch(`/api/expenses/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader(),
             });

@@ -59,7 +59,7 @@ export default function CategoriesPage() {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:3000/categories', {
+            const response = await fetch('/api/categories', {
                 headers: getAuthHeader(),
             });
             if (response.status === 401) {
@@ -87,7 +87,7 @@ export default function CategoriesPage() {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch('http://localhost:3000/categories', {
+            const response = await fetch('/api/categories', {
 
                 method: 'POST',
                 headers: {
@@ -117,7 +117,7 @@ export default function CategoriesPage() {
         if (!confirm('¿Seguro que quieres eliminar esta categoría?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/categories/${id}`, {
+            const response = await fetch(`/api/categories/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader(),
             });

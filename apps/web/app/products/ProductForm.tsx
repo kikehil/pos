@@ -61,8 +61,8 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
 
         try {
             const url = product
-                ? `http://localhost:3000/products/${product.id}`
-                : 'http://localhost:3000/products';
+                ? `/api/products/${product.id}`
+                : '/api/products';
 
             const method = product ? 'PATCH' : 'POST';
 

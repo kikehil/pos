@@ -32,7 +32,7 @@ export default function PosPage() {
 
 
       try {
-        const res = await fetch('http://localhost:3000/products', {
+        const res = await fetch('/api/products', {
           headers: {
             'Authorization': `Bearer ${token}`
           },

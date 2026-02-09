@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
         const fetchDashboard = async () => {
             try {
-                const response = await fetch('http://localhost:3000/analytics/dashboard', {
+                const response = await fetch('/api/analytics/dashboard', {
                     headers: getAuthHeader(),
                 });
                 if (response.status === 401) {
