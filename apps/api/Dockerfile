@@ -6,16 +6,13 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
 # Instalar dependencias
-RUN npm install
+RUN cd apps/api && npm install
 
-# Copiar código y prisma
+# Copiar código
 COPY apps/api ./apps/api
 
-# Generar cliente prisma
-RUN cd apps/api && npx prisma generate
-
-# Construir
-RUN cd apps/api && npm run build
+# Generar cliente prisma y construir
+RUN cd apps/api && npx prisma generate && npm run build
 
 EXPOSE 3000
 
