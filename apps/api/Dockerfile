@@ -2,18 +2,19 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Copiamos archivos de configuración del root
 COPY package*.json ./
-COPY apps/api/package*.json ./apps/api/
 
-# Instalar dependencias
-RUN cd apps/api && npm install
-
-# Copiar código
+# Copiamos la API
 COPY apps/api ./apps/api
 
-# Generar cliente prisma y construir
-RUN cd apps/api && npx prisma generate && npm run build
+# Nos movemos a la carpeta de la API para instalar y construir
+WORKDIR /app/apps/api
+RUN npm install
+RUN npx prisma generate
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/main"]
+# Arrancamos desde la carpeta de la API
+CMD ["node", "dist/main"]
