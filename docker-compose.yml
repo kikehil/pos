@@ -8,8 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: pos_saas_pro
-    ports:
-      - "3399:3306"
+
     volumes:
       - mysql_data:/var/lib/mysql
 
