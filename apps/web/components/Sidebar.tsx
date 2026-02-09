@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
     LayoutGrid,
     ShoppingCart,
     Archive,
     Settings,
-    CreditCard,
     LayoutDashboard,
     Tag,
     LogIn,
     LogOut,
     Users,
-    TrendingDown
+    TrendingDown,
 } from 'lucide-react';
 
 
@@ -70,9 +70,7 @@ export default function Sidebar() {
             {/* Logo / Header */}
             <div className="p-6 h-20 flex items-center border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                        <CreditCard className="w-5 h-5 text-white" />
-                    </div>
+                    <Image src="/logo-icon.png" alt="Logo" width={32} height={32} className="w-8 h-8 object-contain" />
                     <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                         POS Pro
                     </h1>

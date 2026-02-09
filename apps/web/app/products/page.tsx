@@ -18,7 +18,9 @@ import {
     Eye,
     ChevronRight,
     Barcode as BarcodeIcon,
-    Printer
+    Printer,
+    Upload,
+    Clipboard
 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { useReactToPrint } from 'react-to-print';
@@ -29,6 +31,8 @@ import { Product, Category, formatPrice } from '../../types/product';
 import Modal from '../../components/ui/Modal';
 import ProductAvatar from '../../components/ui/ProductAvatar';
 import ProductForm from '../../components/products/ProductForm';
+import ImportProductsModal from '../../components/products/ImportProductsModal';
+import StockAdjustmentModal from '../../components/products/StockAdjustmentModal';
 
 
 export default function ProductsPage() {
@@ -59,6 +63,9 @@ export default function ProductsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
     const [selectedProductForLabel, setSelectedProductForLabel] = useState<Product | null>(null);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
+    const [selectedProductForAdjustment, setSelectedProductForAdjustment] = useState<Product | null>(null);
 
     const labelRef = useRef<HTMLDivElement>(null);
     const handlePrintLabel = useReactToPrint({
@@ -150,6 +157,11 @@ export default function ProductsPage() {
         setIsLabelModalOpen(true);
     };
 
+    const openAdjustmentModal = (product: Product) => {
+        setSelectedProductForAdjustment(product);
+        setIsAdjustmentModalOpen(true);
+    };
+
 
     return (
         <div className="flex h-screen bg-white">
@@ -168,6 +180,13 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
+                    <button
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm active:scale-95"
+                    >
+                        <Upload className="w-4 h-4" />
+                        Importar Excel
+                    </button>
                     <button
                         onClick={openCreateModal}
                         className="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-black transition-all shadow-lg shadow-gray-200 active:scale-95"
@@ -267,6 +286,13 @@ export default function ProductsPage() {
                                                             <BarcodeIcon className="w-4 h-4" />
                                                         </button>
                                                         <button
+                                                            onClick={() => openAdjustmentModal(product)}
+                                                            className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                                                            title="Ajustar Stock (Mermas)"
+                                                        >
+                                                            <Clipboard className="w-4 h-4" />
+                                                        </button>
+                                                        <button
                                                             onClick={() => openEditModal(product)}
                                                             className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                                                         >
@@ -352,6 +378,27 @@ export default function ProductsPage() {
                     </button>
                 </div>
             </Modal>
+
+            {/* Modal de Importación */}
+            <ImportProductsModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onSuccess={() => {
+                    setIsImportModalOpen(false);
+                    fetchProducts();
+                }}
+            />
+
+            {/* Modal de Ajuste de Stock */}
+            <StockAdjustmentModal
+                isOpen={isAdjustmentModalOpen}
+                onClose={() => setIsAdjustmentModalOpen(false)}
+                product={selectedProductForAdjustment}
+                onSuccess={() => {
+                    setIsAdjustmentModalOpen(false);
+                    fetchProducts();
+                }}
+            />
         </div>
 
     );

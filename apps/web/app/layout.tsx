@@ -6,8 +6,11 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'POS Pro - Sistema de Punto de Venta',
-  description: 'Sistema de punto de venta moderno y eficiente',
+  title: 'POS Pro - Tu negocio bajo control',
+  description: 'Sistema de punto de venta profesional para negocios modernos',
+  icons: {
+    icon: '/logo-icon.png',
+  },
 };
 
 export default function RootLayout({

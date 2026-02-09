@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { CreditCard, Lock, Mail, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -57,8 +58,8 @@ export default function LoginPage() {
             <div className="w-full max-w-md relative">
                 {/* Logo Section */}
                 <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="w-16 h-16 bg-gray-900 rounded-[22px] flex items-center justify-center shadow-2xl shadow-gray-200 mb-6 group transition-transform hover:scale-105 active:scale-95 duration-300">
-                        <CreditCard className="w-8 h-8 text-indigo-400 group-hover:rotate-12 transition-transform" />
+                    <div className="mb-6 group transition-transform hover:scale-105 active:scale-95 duration-300">
+                        <Image src="/logo-icon.png" alt="Logo" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-xl" />
                     </div>
                     <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">POS Pro</h1>
                     <div className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-100 rounded-full shadow-sm">

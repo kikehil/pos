@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { BulkImportItemDto } from './dto/bulk-import.dto';
 
 @Injectable()
 export class ProductsService {
@@ -115,6 +116,99 @@ export class ProductsService {
   async findAllCategories(tenantId: string) {
     return this.prisma.category.findMany({
       where: { tenantId },
+    });
+  }
+
+  async bulkImport(tenantId: string, items: BulkImportItemDto[]) {
+    return this.prisma.$transaction(async (tx) => {
+      let importedCount = 0;
+
+      for (const item of items) {
+        // 1. Resolver Categoría
+        let categoryId: string | null = null;
+        if (item.categoryName) {
+          const existingCategory = await tx.category.findFirst({
+            where: {
+              tenantId,
+              name: item.categoryName,
+            },
+          });
+
+          if (existingCategory) {
+            categoryId = existingCategory.id;
+          } else {
+            const newCategory = await tx.category.create({
+              data: {
+                name: item.categoryName,
+                tenantId,
+              },
+            });
+            categoryId = newCategory.id;
+          }
+        }
+
+        // 2. Resolver Producto (Upsert por SKU)
+        // Generar SKU si no existe para la creación
+        const productSku = item.sku || (item.name.substring(0, 3).toUpperCase() + Math.floor(1000 + Math.random() * 9000));
+
+        let existingProduct = null;
+        if (item.sku) {
+          existingProduct = await tx.product.findFirst({
+            where: {
+              tenantId,
+              sku: item.sku,
+            },
+            include: { variants: true }
+          });
+        }
+
+        if (existingProduct) {
+          // Actualizar producto existente
+          await tx.product.update({
+            where: { id: existingProduct.id },
+            data: {
+              name: item.name,
+              categoryId: categoryId, // Actualizar categoría si cambió
+              // No actualizamos SKU del padre si ya existía
+            }
+          });
+
+          // Actualizar variante principal (la primera)
+          if (existingProduct.variants.length > 0) {
+            await tx.productVariant.update({
+              where: { id: existingProduct.variants[0].id },
+              data: {
+                price: item.price,
+                stock: item.stock, // Opcional: Sumar stock o reemplazar? Reemplazar es lo común en importación completa, pero prompt dice "actualice". Asumo reemplazar.
+                cost: item.cost ?? undefined,
+              }
+            });
+          }
+        } else {
+          // Crear nuevo producto
+          await tx.product.create({
+            data: {
+              name: item.name,
+              sku: productSku,
+              tenantId,
+              categoryId,
+              variants: {
+                create: {
+                  name: 'Standard',
+                  sku: `${productSku}-STD`,
+                  price: item.price,
+                  stock: item.stock,
+                  cost: item.cost,
+                  isActive: true,
+                }
+              }
+            }
+          });
+        }
+        importedCount++;
+      }
+
+      return { success: true, count: importedCount, errors: [] };
     });
   }
 }

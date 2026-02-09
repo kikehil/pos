@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, U
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { BulkImportDto } from './dto/bulk-import.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -27,6 +28,12 @@ export class ProductsController {
       ...createProductDto,
       tenantId: tenant.id,
     });
+  }
+
+  @Post('bulk-import')
+  async bulkImport(@Body() bulkImportDto: BulkImportDto) {
+    const tenant = await this.getDemoTenant();
+    return this.productsService.bulkImport(tenant.id, bulkImportDto.items);
   }
 
   @Get()
