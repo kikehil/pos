@@ -36,7 +36,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://pos-cerebrodigital.com.mx/api
+        NEXT_PUBLIC_API_URL: https://pos.cerebrodigital.com.mx/api
     container_name: pos_web
 
     depends_on:
